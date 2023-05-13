@@ -1,0 +1,8 @@
+project: AudioFile
+target: fuzz-AudioFile
+testsuite:
+    - file://mayhem/testsuite
+
+cmds:
+  - cmd: /AudioFile_fuzz
+    libfuzzer: true

@@ -2,20 +2,19 @@
 #include <stdio.h>
 #include <climits>
 #include <math.h>
-
-//#include <fuzzer/FuzzedDataProvider.h>
+#include <stddef.h>
+#include <fuzzer/FuzzedDataProvider.h>
 #include "AudioFile.h"
 
-using namespace std;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-//    FuzzedDataProvider provider(data, size);
-//    int x = provider.ConsumeIntegral<int>();
+    FuzzedDataProvider provider(data, size);
+    float x = provider.ConsumeFloatingPoint<float>();
 
     AudioFile<double>::AudioBuffer buffer;
     AudioFile<double> audioFile;
-    audioFile.load ("testsuite/audiofile.wav");
+    audioFile.load ("testsuite/test-audio.wav");
 
     buffer.resize (2);
 
@@ -29,7 +28,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     for (int i = 0; i < numSamplesPerChannel; i++)
     {
-        float sample = sinf (2. * M_PI * ((float) i / sampleRate) * frequency) ;
+        //float sample = sinf (2. * M_PI * ((float) i / sampleRate) * frequency) ;
+        float sample = sinf (2. * M_PI * ((float) i / sampleRate) * (frequency + x));
         for (int channel = 0; channel < numChannels; channel++)
             buffer[channel][i] = sample * 0.5;
     }

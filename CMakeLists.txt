@@ -40,5 +40,17 @@ if (BUILD_TESTS)
   add_subdirectory (tests)
 endif ()
 
+if(AUDIO_FILE_BUILD_FUZZER)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(FATAL_ERROR "Fuzzer is only supported on Clang")
+  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=fuzzer-no-link,address,undefined")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-sanitize-recover=undefined")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O1")
+  add_link_options(-fsanitize=fuzzer-no-link,address,undefined)
+  add_subdirectory(mayhem)
+endif()
+
 #===============================================================================
 set (CMAKE_SUPPRESS_REGENERATION true)
