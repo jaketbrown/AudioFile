@@ -9,32 +9,21 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    // Get the bytes into a vector<uint8_t>
     FuzzedDataProvider provider(data, size);
-    float x = provider.ConsumeFloatingPoint<float>();
+    std::vector<uint8_t> consumedBytes = provider.ConsumeRemainingBytes<uint8_t>();
 
-    AudioFile<double>::AudioBuffer buffer;
+    // Prepend a valid header the target is expecting
+    std::string header = "RIFF";
+    // Convert the string to a vector of uint8_t
+    std::vector<uint8_t> strVec(header.begin(), header.end());
+
+    // Prepend the string vector to the original vector
+    consumedBytes.insert(consumedBytes.begin(), strVec.begin(), strVec.end());
+
     AudioFile<double> audioFile;
-    audioFile.load ("testsuite/test-audio.wav");
-
-    buffer.resize (2);
-
-    buffer[0].resize (100000);
-    buffer[1].resize (100000);
-
-    int numChannels = 2;
-    int numSamplesPerChannel = 100000;
-    float sampleRate = 44100.f;
-    float frequency = 440.f;
-
-    for (int i = 0; i < numSamplesPerChannel; i++)
-    {
-        //float sample = sinf (2. * M_PI * ((float) i / sampleRate) * frequency) ;
-        float sample = sinf (2. * M_PI * ((float) i / sampleRate) * (frequency + x));
-        for (int channel = 0; channel < numChannels; channel++)
-            buffer[channel][i] = sample * 0.5;
-    }
-
-    audioFile.setAudioBuffer(buffer);
+    // Test the loadFromMemory Function
+    audioFile.loadFromMemory(consumedBytes);
 
 
     return 0;
