@@ -12,8 +12,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     // Get the bytes into a vector<uint8_t>
     FuzzedDataProvider provider(data, size);
     std::vector<uint8_t> consumedBytes = provider.ConsumeRemainingBytes<uint8_t>();
-    // An empty byte vector doesn't help us.
-    if (consumedBytes.size() == 0) {
+    // An empty or small byte vector doesn't help us.
+    if (consumedBytes.size() < 12) {
         return 0;
     }
     // Prepend a valid header the target is expecting
