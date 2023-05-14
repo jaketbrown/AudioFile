@@ -11,6 +11,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     // Get the bytes into a vector<uint8_t>
     FuzzedDataProvider provider(data, size);
+    int bitDepth = provider.ConsumeIntegralInRange(1, 24);
     std::vector<uint8_t> consumedBytes = provider.ConsumeRemainingBytes<uint8_t>();
     // An empty or small byte vector doesn't help us.
     if (consumedBytes.size() < 12) {
@@ -25,8 +26,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     consumedBytes.insert(consumedBytes.begin(), strVec.begin(), strVec.end());
 
     // Test the loadFromMemory Function
-    AudioFile<double> audioFile;
+    AudioFile<uint8_t> audioFile;
+    // disable logging
+    audioFile.shouldLogErrorsToConsole(false);
     audioFile.loadFromMemory(consumedBytes);
+    audioFile.save("audioFile.wav");
+    audioFile.setBitDepth (bitDepth);
+    audioFile.setSampleRate (44100);
 
     return 0;
 }
